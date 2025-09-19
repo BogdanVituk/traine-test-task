@@ -97,10 +97,10 @@ VITE_API_URL=`http://localhost:7000`
 Screenshots app
 
 ### Superheroes List
-![Superheroes List](docs/list.jpg)
+![Superheroes List](./docs/list.jpg)
 
 ### Superhero Detail
-![Superhero Detail](docs/item.jpg)
+![Superhero Detail](./docs/item.jpg)
 
 ### Create/Edit Form
-![Create/Edit Form](docs/createForm.jpg)
+![Create/Edit Form](./docs/createForm.jpg)
