@@ -93,7 +93,7 @@ DATABASE_URL="mysql://username:password@localhost:3306/trainetest?schema=public"
 
 Frontend (frontend/.env)
 VITE_API_URL=`http://localhost:7000`
-
+```
 Screenshots app
 
 ### Superheroes List
