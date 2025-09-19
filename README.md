@@ -1,91 +1,106 @@
-Superhero Database Web Application
+# **Superhero Database Web Application**
 
-This project is a web application that allows performing CRUD operations on superheroes.
-Each superhero has a nickname, real name, description, superpowers, catchphrase, and images.
+This project is a **web application** that allows performing **CRUD operations on superheroes**.  
+Each superhero has a **nickname, real name, description, superpowers, catchphrase, and images**.
 
-The application consists of:
+---
 
-Backend: built with Node.js (NestJS), Prisma, multer.
+## **Application Stack**
 
-Frontend: built with React,Vite, Redux Toolkit, shadCn, tailwindCSS, Axios, React-Hook-Form.
+- **Backend:** Node.js (NestJS), Prisma, Multer  
+- **Frontend:** React, Vite, Redux Toolkit, ShadCn, TailwindCSS, Axios, React-Hook-Form
 
-Features
+---
 
-Create, edit, and delete superheroes.
+## **Features**
 
-Assign and remove images when creating or editing.
+- **Create, edit, and delete superheroes**  
+- **Assign and remove images** when creating or editing  
+- **List superheroes with pagination** (5 per page)  
+- **View details** of a superhero with all information and images
 
-List superheroes with pagination (5 per page).
+---
 
-View details of a superhero with all its information and images.
+## **Images / File Storage**
+
+- In this project, **superhero images are stored locally on the server**  
+- When you add or edit a superhero, files are stored in a folder on the backend (e.g., `server/uploads/`)  
+- For production, you can replace local storage with cloud storage (AWS S3, Cloudinary, etc.), but **local files were used for this task**
+
+---
+
+## **Project Structure**
+
+trainee-test-task/
+
+backend/ # Backend (NestJS)
+
+    src/
+
+    package.json
+
+frontend/ # Frontend (React)
+
+    src/
+
+    package.json
+
+README.md
 
 
-Images 
+---
 
-In this project, superhero images are stored locally on the server.
+## **Installation**
 
-When you add or edit a superhero, the files are stored in a special folder on the backend (for example, server/uploads/).
+1. Clone the repository:
 
-When deploying to production, you can replace local storage with cloud storage (AWS S3, Cloudinary, etc.), but local files were used for this task.
+```bash
+git clone https://github.com/BogdanVituk/trainee-test-task.git
+cd trainee-test-task
 
-traine test task/
-│
-├─ server/        # Backend (NestJS)
-│   ├─ src/
-│   ├─ package.json
-│   └─ ...
-│
-├─ client/       # Frontend (React)
-│   ├─ src/
-│   ├─ package.json
-│   └─ ...
-│
-└─ README.md
 
-Installation
+Install dependencies for backend:
 
-1. git clone https://github.com/username/traine test task.git
-cd traine test task
+    cd backend
+    npm install
 
-2. Install dependencies for backend
 
-cd server
-npm install
+Install dependencies for frontend:
 
-3. Install dependencies for frontend
+    cd ../frontend
+    npm install
 
-cd ../client
-
-npm install
 
 Running the Project
-    Open two terminal windows/tabs:
 
-1. Backend
-cd server
-npm run start:dev   
+Open two terminal windows/tabs:
+
+Backend
+
+    cd backend
+    npm run start:dev
+
 
 Frontend
-cd client
-npm run dev
 
-Create .env files for both backend and frontend.
-Example for backend (backend/.env):
+    cd frontend
+    npm run dev
 
+Environment Variables
+Backend (backend/.env)
 PORT=7000
 DATABASE_URL="mysql://username:password@localhost:3306/trainetest?schema=public"
 
-Front end env 
-
-VITE_API_URL=http://localhost:6000
+Frontend (frontend/.env)
+VITE_API_URL=`http://localhost:6000`
 
 Screenshots app
 
 ### Superheroes List
-![Superheroes List](docs/list.jpg)
+<img src="docs/list.jpg" alt="Superheroes List" width="400"/>
 
 ### Superhero Detail
-![Superhero Detail](docs/item.jpg)
+<img src="docs/item.jpg" alt="Superhero Detail" width="400"/>
 
 ### Create/Edit Form
-![Create/Edit Form](docs/createForm.jpg)
+<img src="docs/createForm.jpg" alt="Create/Edit Form" width="400"/>
