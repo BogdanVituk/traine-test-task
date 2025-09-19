@@ -92,15 +92,15 @@ PORT=7000
 DATABASE_URL="mysql://username:password@localhost:3306/trainetest?schema=public"
 
 Frontend (frontend/.env)
-VITE_API_URL=`http://localhost:6000`
+VITE_API_URL=`http://localhost:7000
 
 Screenshots app
 
 ### Superheroes List
-<img src="docs/list.jpg" alt="Superheroes List" width="400"/>
+![Superheroes List](docs/list.jpg)
 
 ### Superhero Detail
-<img src="docs/item.jpg" alt="Superhero Detail" width="400"/>
+![Superhero Detail](docs/item.jpg)
 
 ### Create/Edit Form
-<img src="docs/createForm.jpg" alt="Create/Edit Form" width="400"/>
+![Create/Edit Form](docs/createForm.jpg)
