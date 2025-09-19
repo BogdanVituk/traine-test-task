@@ -1,0 +1,31 @@
+# Node.js
+client/node_modules/
+server/node_modules/
+
+# Build / збірки
+server/dist
+
+server/uploads
+
+# Environment variables
+client/.env
+server/.env
+
+
+# Logs
+logs
+*.log
+*.log.*
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# IDE / OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Others
+*.swp
