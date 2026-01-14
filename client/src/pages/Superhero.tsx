@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "react-router";
 import { useAppDispatch, useAppSelector } from "../hooks";
 import { useEffect } from "react";
 import { deleteSuperHero, fetchSuperHero } from "../slices/superheroSlice";
-import EditSuperHeroDialog from "@/componets/EditSuperHeroDialog";
+
 
 import {
   Card,
@@ -13,6 +13,8 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
+import SuperHeroDialog from "@/components/SuperHeroDialog";
+
 
 const SuperHero = () => {
 
@@ -25,11 +27,17 @@ const SuperHero = () => {
     const { selectedSuperhero, loading } = useAppSelector(state => state.superheros)
 
     useEffect(() => {
+
+        if(!id) return;
+        
         dispatch(fetchSuperHero(id))
     }, [])
 
 
     const removeSuperHeroHandler = () => {
+
+        if(!id) return;
+
         dispatch(deleteSuperHero(id))
         navigate('/')
     }
@@ -53,7 +61,7 @@ const SuperHero = () => {
                     <div className="mt-3 mb-4 flex gap-3">
                         {
                         selectedSuperhero?.Images && selectedSuperhero?.Images.map(item => (
-                                    <img src={`http://localhost:3000${item.url}`} alt="prewiew"  width={250} height={100} style={{ objectFit: 'cover' }} />
+                                    <img src={`${import.meta.env.VITE_API_URL}${item.url}`} alt="prewiew"  width={250} height={100} style={{ objectFit: 'cover' }} />
                                 ))
                         }
                     </div>
@@ -62,7 +70,7 @@ const SuperHero = () => {
                 </Card>
             <div>
 
-                <EditSuperHeroDialog/>
+                <SuperHeroDialog mode="edit" />
             </div>
         </div>
     )

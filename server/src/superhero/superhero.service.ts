@@ -10,19 +10,19 @@ export class SuperheroService {
 
   async create(createSuperheroDto: CreateSuperheroDto, imagesUrls: string[]) {
 
-    return await this.prisma.superhero.create({
+    return  this.prisma.superhero.create({
       data: {
         ...createSuperheroDto,
         Images: {
             create: imagesUrls.map(url => ({ url }))
           }
       },
-      include: {Images: true}
+      include: { Images: true }
     })
   }
 
   async findAll() {
-    return await this.prisma.superhero.findMany();
+    return  this.prisma.superhero.findMany();
   }
 
   async getSuperhero(page: number = 1, limit: number = 5) {
@@ -50,14 +50,14 @@ export class SuperheroService {
   }
 
   async findOne(id: number) {
-    return await this.prisma.superhero.findUnique({ 
+    return  this.prisma.superhero.findUnique({ 
       where: { id }, 
       include: { Images: true }
     });
   }
 
   async update(id: number, updateSuperheroDto: UpdateSuperheroDto, imagesUrls: string[]) {
-    return await this.prisma.superhero.update({
+    return  this.prisma.superhero.update({
       data: {
         ...updateSuperheroDto,
         Images: imagesUrls?.length  ?
@@ -74,15 +74,14 @@ export class SuperheroService {
   }
 
   async remove(id: number) {
-    return await this.prisma.superhero.delete({ where: { id } });
+    return  this.prisma.superhero.delete({ where: { id } });
   }
   
   async removeImage(imgId) {
-    const data = await this.prisma.image.delete({ 
+    return  this.prisma.image.delete({ 
       where: { 
         id: imgId
        }
      });
-    return data;
   }
 }
