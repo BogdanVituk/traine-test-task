@@ -9,7 +9,6 @@ export class SuperheroService {
   constructor(private prisma: PrismaService) { }
 
   async create(createSuperheroDto: CreateSuperheroDto, imagesUrls: string[]) {
-
     return  this.prisma.superhero.create({
       data: {
         ...createSuperheroDto,

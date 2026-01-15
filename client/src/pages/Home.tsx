@@ -1,35 +1,21 @@
 import SuperHeroDialog from "@/components/SuperHeroDialog";
 import SuperHeroList from "../components/SuperHeroList";
 import SuperHeroPagination from "@/components/SuperHeroPagination";
-import { useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "@/hooks";
-import { fetchSuperHeros, setPage } from "@/slices/superheroSlice";
+import { useState } from "react";
+
 
 const Home = () => {
     
-    const { page, totalPages, superheros } = useAppSelector(state => state.superheros)
-    
-    const dispatch = useAppDispatch();
 
-    useEffect(() => {
-
-        dispatch(fetchSuperHeros(page))
-        
-    }, [page, dispatch])
+    const [openDialog, setOpenDialog] = useState(false);
 
     return (
         <div>
-            <SuperHeroList 
-            superheros={superheros}
-            />
+            <SuperHeroList/>
 
-            <SuperHeroPagination
-            page={page}
-            totalPages={totalPages}
-            onChange={p => dispatch(setPage(p))}
-            />
+            <SuperHeroPagination/>
             
-            <SuperHeroDialog mode='create' />
+            <SuperHeroDialog openDialog={openDialog} setOpenDialog={setOpenDialog} mode='create' />
         </div>
     )
 }

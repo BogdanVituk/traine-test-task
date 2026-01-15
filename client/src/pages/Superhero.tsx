@@ -1,76 +1,72 @@
 import { useNavigate, useParams } from "react-router";
-import { useAppDispatch, useAppSelector } from "../hooks";
-import { useEffect } from "react";
-import { deleteSuperHero, fetchSuperHero } from "../slices/superheroSlice";
+import { useState } from "react";
 
 
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import SuperHeroDialog from "@/components/SuperHeroDialog";
+import type { image, SuperHero } from "@/types";
+import { useDeleteSuperHeroMutation, useGetSuperHeroByIdQuery } from "@/store/superHeroApi";
 
 
 const SuperHero = () => {
 
-    const dispatch = useAppDispatch();
 
-    const { id } = useParams();   
+    const { id } = useParams();
 
     const navigate = useNavigate();
 
-    const { selectedSuperhero, loading } = useAppSelector(state => state.superheros)
 
-    useEffect(() => {
+    const [openDialog, setOpenDialog] = useState(false);
 
-        if(!id) return;
-        
-        dispatch(fetchSuperHero(id))
-    }, [])
+    if (!id) return;
 
+    const { data, error, isLoading } = useGetSuperHeroByIdQuery(id)
+    const [ deleteSuperHero] = useDeleteSuperHeroMutation();
 
-    const removeSuperHeroHandler = () => {
-
-        if(!id) return;
-
-        dispatch(deleteSuperHero(id))
+    const removeSuperHeroHandler = async () => {
+        await deleteSuperHero(id);
         navigate('/')
     }
 
-    if(loading) return <div>Loading...</div>
+    if (isLoading) return <div>Loading...</div>
 
+    if (error) return <div>Error...</div>
 
     return (
         <div>
             <Card className="mb-4">
                 <CardHeader>
-                    <CardTitle>{selectedSuperhero?.nickname}</CardTitle>
-                    <CardDescription>Real name: {selectedSuperhero?.real_name}</CardDescription>
+                    <CardTitle>{data?.nickname}</CardTitle>
+                    <CardDescription>Real name: {data?.real_name}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <p>Catch phrase: {selectedSuperhero?.catch_phrase}</p>
-                    <p>Origin description: {selectedSuperhero?.origin_description}</p>
+                    <p>Catch phrase: {data?.catch_phrase}</p>
+                    <p>Origin description: {data?.origin_description}</p>
                 </CardContent>
                 <CardFooter className="flex-col items-center">
-                    <p>Superpowers: {selectedSuperhero?.superpowers}</p>
+                    <p>Superpowers: {data?.superpowers}</p>
                     <div className="mt-3 mb-4 flex gap-3">
                         {
-                        selectedSuperhero?.Images && selectedSuperhero?.Images.map(item => (
-                                    <img src={`${import.meta.env.VITE_API_URL}${item.url}`} alt="prewiew"  width={250} height={100} style={{ objectFit: 'cover' }} />
-                                ))
+                            data?.Images && data?.Images.map((item: image) => (
+                                <img src={`${import.meta.env.VITE_API_URL}${item.url}`} alt="prewiew" width={250} height={100} style={{ objectFit: 'cover' }} />
+                            ))
                         }
                     </div>
                     <Button onClick={removeSuperHeroHandler}>Delete superhero</Button>
                 </CardFooter>
-                </Card>
+            </Card>
+
             <div>
 
-                <SuperHeroDialog mode="edit" />
+                <SuperHeroDialog openDialog={openDialog} setOpenDialog={setOpenDialog} hero={data} mode="edit" />
             </div>
         </div>
     )

@@ -5,17 +5,18 @@ import {
 } from "@/components/ui/dialog"
 
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import SuperheroForm from "./SuperHeroForm";
+import type { Dispatch, SetStateAction } from "react";
+import type { SuperHero } from "@/types";
 
 interface SuperHeroDialogProps {
     mode: "create" | 'edit';
-
+    openDialog: boolean
+    setOpenDialog: Dispatch<SetStateAction<boolean>>
+    hero?: SuperHero
 }
 
-const SuperHeroDialog = ({mode}: SuperHeroDialogProps) => {
-
-    const [openDialog, setOpenDialog] = useState(false);
+const SuperHeroDialog = ({ mode, openDialog, setOpenDialog, hero }: SuperHeroDialogProps) => {
 
  
     return (
@@ -25,9 +26,11 @@ const SuperHeroDialog = ({mode}: SuperHeroDialogProps) => {
                     {mode =='create' ? "Create Hero" : 'Edit Hero'}
                 </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-xl p-6">
                 <SuperheroForm 
-                onClose={setOpenDialog}
+                mode={mode}
+                onClose={() => setOpenDialog(false)}
+                hero={hero}
                 />
             </DialogContent>
         </Dialog>

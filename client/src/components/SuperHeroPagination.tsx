@@ -1,17 +1,25 @@
 import {
-    Pagination,
-    PaginationContent,
-    PaginationItem,
-    PaginationLink,
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
 } from "@/components/ui/pagination"
+import { useAppDispatch, useAppSelector } from "@/hooks"
+import { useGetSuperHerosQuery } from "@/store/superHeroApi"
+import { setPage } from "@/store/superheroSlice"
 
-interface PaginationProps {
-  page: number
-  totalPages: number
-  onChange: (page: number) => void
-}
 
-const SuperHeroPagination = ({ page, totalPages, onChange }: PaginationProps) => {
+
+const SuperHeroPagination = () => {
+
+  const dispatch = useAppDispatch();
+
+  const { page } = useAppSelector(state => state.superheros)
+
+  const { data } = useGetSuperHerosQuery(page);
+
+  const totalPages = data?.meta.lastPage || 1;
+
   return (
     <Pagination className="mb-2">
       <PaginationContent>
@@ -21,7 +29,7 @@ const SuperHeroPagination = ({ page, totalPages, onChange }: PaginationProps) =>
             <PaginationItem key={p}>
               <PaginationLink
                 isActive={page === p}
-                onClick={() => onChange(p)}
+                onClick={() => dispatch(setPage(p))}
               >
                 {p}
               </PaginationLink>

@@ -1,72 +1,82 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAppDispatch, useAppSelector } from "../hooks";
-import { createSuperHero, updateSuperHero, deleteSuperHeroImg } from "../slices/superheroSlice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { superHeroSchema, type FormValues } from "@/shemas/shems";
+import { superHeroSchema, type FormValues } from "@/shemas/shema";
 import type { SuperHero } from "@/types";
 import ExistingImages from "./ExistingImages";
+import { useAddSuperHeroMutation, useDeleteSuperHeroImageMutation, useUpdateSuperHeroMutation } from "@/store/superHeroApi";
 
 interface SuperheroFormProps {
-  onClose: (val: boolean) => void;
+  onClose: () => void;
+  mode: "create" | 'edit';
+  hero?: SuperHero
 }
 
-const SuperheroForm = ({ onClose }: SuperheroFormProps) => {
+const SuperheroForm = ({ onClose, mode, hero }: SuperheroFormProps) => {
 
+  const [addSuperHero, { isLoading }] = useAddSuperHeroMutation();
+  const [updateSuperHero, { isLoading: isUpdateLoading }] = useUpdateSuperHeroMutation();
+  const [deleteSuperHeroImage] = useDeleteSuperHeroImageMutation();
 
-  const { error, loading, selectedSuperhero } = useAppSelector(state => state.superheros)
-
-    const isEditMode = !!selectedSuperhero;
-
-  const dispatch = useAppDispatch();
 
   const [images, setImages] = useState<File[]>([]);
   const [urlsImages, setUrlImages] = useState<string[]>([]);
 
-  const [existingImages, setExistingImages] = useState<SuperHero["Images"]>(selectedSuperhero?.Images || []);
+  const [existingImages, setExistingImages] = useState<SuperHero["Images"]>(hero?.Images || []);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(superHeroSchema),
     defaultValues: {
-      real_name: selectedSuperhero?.real_name || "",
-      nickname: selectedSuperhero?.nickname || "",
-      superpowers: selectedSuperhero?.superpowers || "",
-      catch_phrase: selectedSuperhero?.catch_phrase || "",
-      origin_description: selectedSuperhero?.origin_description || "",
+      real_name: "",
+      nickname: "",
+      superpowers: "",
+      catch_phrase: "",
+      origin_description: "",
     },
   });
 
   useEffect(() => {
-
-    return () => {
-      urlsImages.forEach(url => URL.revokeObjectURL(url))
+    if (mode == "edit" && hero) {
+      form.reset({
+        real_name: hero.real_name,
+        nickname: hero.nickname,
+        superpowers: hero.superpowers,
+        catch_phrase: hero.catch_phrase,
+        origin_description: hero.origin_description,
+      });
+      setExistingImages(hero.Images || []);
+    } else {
+      form.reset();
+      setExistingImages([]);
+      setImages([]);
+      setUrlImages([]);
     }
-  }, [urlsImages])
+  }, [mode, hero]);
+
 
   const onSubmit = async (data: FormValues) => {
 
     const fd = new FormData();
 
-
     Object.entries(data).forEach(([key, value]) => fd.append(key, value));
-
 
     if (images.length) {
       images.forEach((file) => fd.append("images", file));
     }
 
     try {
-
-      if (isEditMode) {
-        await dispatch(updateSuperHero({ id: selectedSuperhero.id, body: fd })).unwrap();
-        // onClose(false);
-        // form.reset();
+      if (mode === 'edit') {
+        if (hero)
+          await updateSuperHero({ id: hero.id, body: fd }).unwrap();
       } else {
-        await dispatch(createSuperHero(fd)).unwrap();
+        await addSuperHero(fd).unwrap();
       }
+
+      onClose();
+      form.reset();
 
     } catch (error) {
       console.log(error)
@@ -85,18 +95,27 @@ const SuperheroForm = ({ onClose }: SuperheroFormProps) => {
   };
 
   const removeFile = (index: number) => {
+    URL.revokeObjectURL(urlsImages[index]);
     setUrlImages((prev) => prev.filter((_, i) => i !== index));
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const removeExisting = (imageId: number) => {
-    dispatch(deleteSuperHeroImg(imageId));
-    setExistingImages((prev) => prev.filter((img) => img.id !== imageId));
+  const removeExisting = async (imageId: number) => {
+     try {
+
+      await deleteSuperHeroImage(imageId).unwrap();
+      setExistingImages((prev) => prev.filter((img) => img.id !== imageId));
+
+    } catch (e) {
+      console.log(e);
+    }
   };
+
+  const isSaving = isLoading || isUpdateLoading;
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" data-disabled={isSaving}>
 
         {(["real_name", "nickname", "superpowers", "origin_description", "catch_phrase"] as const).map((fieldName) => (
           <FormField
@@ -116,7 +135,7 @@ const SuperheroForm = ({ onClose }: SuperheroFormProps) => {
         ))}
 
 
-        {isEditMode && <ExistingImages existingImages={existingImages} onDelete={removeExisting} />}
+        {mode == 'edit' && <ExistingImages existingImages={existingImages} onDelete={removeExisting} />}
 
 
         <FormItem>
@@ -136,11 +155,9 @@ const SuperheroForm = ({ onClose }: SuperheroFormProps) => {
           </div>
         </FormItem>
 
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? "Saving..." : isEditMode ? "Update Superhero" : "Create Superhero"}
+        <Button type="submit" className="w-full" disabled={isSaving}>
+          {isSaving ? "Saving..." : mode == 'edit' ? "Update Superhero" : "Create Superhero"}
         </Button>
-
-        {error && error}
       </form>
     </Form>
   );
