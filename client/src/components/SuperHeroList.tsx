@@ -1,5 +1,3 @@
-
-
 import { useAppSelector } from "../hooks"
 import SuperHeroItem from "./SuperHeroItem";
 import { useGetSuperHerosQuery } from "@/store/superHeroApi";

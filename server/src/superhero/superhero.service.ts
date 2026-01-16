@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSuperheroDto } from './dto/create-superhero.dto';
 import { UpdateSuperheroDto } from './dto/update-superhero.dto';
 import { PrismaService } from 'src/prisma.service';
@@ -24,7 +24,7 @@ export class SuperheroService {
     return  this.prisma.superhero.findMany();
   }
 
-  async getSuperhero(page: number = 1, limit: number = 5) {
+  async findAllPaginated(page: number = 1, limit: number = 5) {
     const skip = (page - 1) * limit;
     const [data, total] =  await Promise.all([this.prisma.superhero.findMany({
       skip,
@@ -49,10 +49,16 @@ export class SuperheroService {
   }
 
   async findOne(id: number) {
-    return  this.prisma.superhero.findUnique({ 
-      where: { id }, 
-      include: { Images: true }
-    });
+    const superHero = await this.prisma.superhero.findUnique({
+    where: { id },
+    include: { Images: true },
+  });
+
+    if (!superHero) {
+      throw new NotFoundException('Superhero not found');
+    }
+
+  return superHero;
   }
 
   async update(id: number, updateSuperheroDto: UpdateSuperheroDto, imagesUrls: string[]) {
@@ -76,7 +82,7 @@ export class SuperheroService {
     return  this.prisma.superhero.delete({ where: { id } });
   }
   
-  async removeImage(imgId) {
+  async removeImage(imgId: number) {
     return  this.prisma.image.delete({ 
       where: { 
         id: imgId

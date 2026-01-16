@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -22,9 +22,7 @@ const SuperheroForm = ({ onClose, mode, hero }: SuperheroFormProps) => {
   const [deleteSuperHeroImage] = useDeleteSuperHeroImageMutation();
 
 
-  const [images, setImages] = useState<File[]>([]);
-  const [urlsImages, setUrlImages] = useState<string[]>([]);
-
+  const [imagePreviews, setImagePreviews] = useState<{ file: File, url: string }[]>([]);
   const [existingImages, setExistingImages] = useState<SuperHero["Images"]>(hero?.Images || []);
 
   const form = useForm<FormValues>({
@@ -51,8 +49,7 @@ const SuperheroForm = ({ onClose, mode, hero }: SuperheroFormProps) => {
     } else {
       form.reset();
       setExistingImages([]);
-      setImages([]);
-      setUrlImages([]);
+      setImagePreviews([]);
     }
   }, [mode, hero]);
 
@@ -63,8 +60,8 @@ const SuperheroForm = ({ onClose, mode, hero }: SuperheroFormProps) => {
 
     Object.entries(data).forEach(([key, value]) => fd.append(key, value));
 
-    if (images.length) {
-      images.forEach((file) => fd.append("images", file));
+    if (imagePreviews.length) {
+      imagePreviews.forEach(({file}) => fd.append("images", file));
     }
 
     try {
@@ -87,20 +84,22 @@ const SuperheroForm = ({ onClose, mode, hero }: SuperheroFormProps) => {
 
     if (!files) return;
 
-    const newFiles = Array.from(files);
-    const urls = newFiles.map((file) => URL.createObjectURL(file));
+    const newPreviews = Array.from(files).map(file => ({
+      file,
+      url: URL.createObjectURL(file)
+    }))
 
-    setUrlImages((prev) => [...prev, ...urls]);
-    setImages((prev) => [...prev, ...newFiles]);
+    setImagePreviews((prev) => [...prev, ...newPreviews]);
   };
 
-  const removeFile = (index: number) => {
-    URL.revokeObjectURL(urlsImages[index]);
-    setUrlImages((prev) => prev.filter((_, i) => i !== index));
-    setImages((prev) => prev.filter((_, i) => i !== index));
-  };
+  const removeFile = useCallback((index: number) => {
 
-  const removeExisting = async (imageId: number) => {
+    URL.revokeObjectURL(imagePreviews[index].url);
+    
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+  }, [imagePreviews]);
+
+  const removeExisting = useCallback( async (imageId: number) => {
      try {
 
       await deleteSuperHeroImage(imageId).unwrap();
@@ -109,13 +108,13 @@ const SuperheroForm = ({ onClose, mode, hero }: SuperheroFormProps) => {
     } catch (e) {
       console.log(e);
     }
-  };
+  }, []);
 
   const isSaving = isLoading || isUpdateLoading;
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" data-disabled={isSaving}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" >
 
         {(["real_name", "nickname", "superpowers", "origin_description", "catch_phrase"] as const).map((fieldName) => (
           <FormField
@@ -144,9 +143,9 @@ const SuperheroForm = ({ onClose, mode, hero }: SuperheroFormProps) => {
             <Input type="file" multiple accept="image/*" onChange={(e) => handleFileChange(e.target.files)} />
           </FormControl>
           <div className="flex gap-2 mt-2 flex-wrap">
-            {urlsImages.map((src, index) => (
+            {imagePreviews.map(({ url }, index) => (
               <div key={index} className="flex flex-col items-center border p-1 rounded">
-                <img src={src} alt="preview" className="w-20 h-20 object-cover" />
+                <img src={url} alt="preview" className="w-20 h-20 object-cover" />
                 <Button type="button" variant="destructive" size="sm" className="mt-1" onClick={() => removeFile(index)}>
                   Cancel
                 </Button>

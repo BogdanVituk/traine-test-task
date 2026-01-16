@@ -49,7 +49,7 @@ export class SuperheroController {
   ) {
 
     if(page && limit) {
-      return this.superheroService.getSuperhero(page, limit);
+      return this.superheroService.findAllPaginated(page, limit);
     }
 
     return this.superheroService.findAll()

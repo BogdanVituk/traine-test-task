@@ -1,4 +1,3 @@
-
 import type { SuperHero } from '@/types';
 import { Button } from './ui/button';
 

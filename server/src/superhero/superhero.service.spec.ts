@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SuperheroService } from './superhero.service';
 import { PrismaService } from 'src/prisma.service';
+import { Superhero } from '@prisma/client';
+import { NotFoundException } from '@nestjs/common';
 
 const prismaMock = {
   superhero: {
@@ -47,7 +49,7 @@ describe('SuperheroService', () => {
       superpowers: "fsdfsf",
       catch_phrase: "dsfsdfds",
 
-     } as any,
+     } as Superhero,
     ["img1.png", "img2.png"]
   );
 
@@ -66,6 +68,21 @@ describe('SuperheroService', () => {
 
   });
 
+  it('should return superhero if found', async () => {
+    const hero = { id: 1, nickname: 'Batman' };
+    prismaMock.superhero.findUnique.mockResolvedValue(hero);
+
+    const result = await service.findOne(1);
+
+    expect(prismaMock.superhero.findUnique).toHaveBeenCalledWith({
+      where: { id: 1 },
+      include: { Images: true },
+    });
+
+    expect(result).toEqual(hero);
+  });
+
+
   it("should delete superhero", async () => {
     await service.remove(5);
     expect(prismaMock.superhero.delete).toHaveBeenCalledWith({ where: { id: 5 }});
@@ -75,27 +92,45 @@ describe('SuperheroService', () => {
       prismaMock.superhero.findMany.mockResolvedValue([{ id: 1 }]);
       prismaMock.superhero.count.mockResolvedValue(10);
 
-      const result = await service.getSuperhero(2, 5);
+      const result = await service.findAllPaginated(2, 5);
 
       expect(prismaMock.superhero.findMany).toHaveBeenCalledWith(
         expect.objectContaining({ skip: 5, take: 5 })
       );
 
-      expect(result.meta.lastPage).toBe(2);
+      expect(result).toEqual({
+      data: [{ id: 1 }],
+      meta: {
+        total: 10,
+        page: 2,
+        lastPage: 2,
+      },
+    });
+  });
+
+  it('should throw NotFoundException if superhero not found', async () => {
+    prismaMock.superhero.findUnique.mockResolvedValue(null);
+
+    await expect(service.findOne(999)).rejects.toThrow(NotFoundException);
   });
 
   it("should update with images", async () => {
   await service.update(1, { nickname: "New" } as any, ["img.png"]);
 
       expect(prismaMock.superhero.update).toHaveBeenCalledWith(
-        expect.objectContaining({
+         expect.objectContaining({
           where: { id: 1 },
-          data: expect.objectContaining({
-            Images: { create: [{ url: "img.png" }] }
-          })
-        })
+          data: {
+            nickname: 'New',
+            Images: {
+              create: [{ url: 'img.png' }],
+            },
+          },
+          include: { Images: true },
+        }),
       );
     });
+
 
   it("should update without images", async () => {
     await service.update(1, { nickname: "New" } as any, []);
@@ -105,6 +140,23 @@ describe('SuperheroService', () => {
         data: expect.not.objectContaining({ Images: expect.anything() })
       })
     );
+  });
+
+  it('should delete superhero by id', async () => {
+    await service.remove(5);
+
+    expect(prismaMock.superhero.delete).toHaveBeenCalledWith({
+      where: { id: 5 },
+    });
+  });
+
+
+  it('should delete image by id', async () => {
+    await service.removeImage(10);
+
+    expect(prismaMock.image.delete).toHaveBeenCalledWith({
+      where: { id: 10 },
+    });
   });
 
 
